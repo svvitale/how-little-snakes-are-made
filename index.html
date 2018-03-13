@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Ants on a Log</title>
+    <title>How Little Snakes are Made</title>
 
     <meta name="author" content="Scott Vitale">
 
@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="bower_components/mermaid/dist/mermaid.dark.css">
     <script src="bower_components/mermaid/dist/mermaid.min.js"></script>
 
+    <script src="bower_components/jquery/dist/jquery.js"></script>
     <script>
         $(document).ready(function() {
             var config = {
@@ -85,353 +86,145 @@
         .reveal pre code {
             max-height: 600px !important;
         }
+
+        #header-left {
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+        #header-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        #footer-left {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
     </style>
 </head>
 
 <body>
+
+<div id="hidden" style="display:none;">
+    <div id="header">
+        <div id="footer-left">@svvitale <i class="fa fa-twitter"></i> <i class="fa fa-github"></i> <i class="fa fa-facebook"></i> <i class="fa fa-linkedin"></i></div>
+    </div>
+</div>
 
 <div class="reveal">
 
     <!-- Any section element inside of this container is displayed as a slide -->
     <div class="slides">
         <section>
-            <h1>Ants on a Log</h1>
-            <h3>Using Celery to Efficiently Process External API Calls in Django</h3>
-            <img src="celery.png" class="image-no-border">
+            <h1>How Little Snakes are Made</h1>
+            <h3>Modern Python Dependency Management in 2018 using pipenv</h3>
+            <img src="baby.jpg" class="image-no-border">
+            <!--<p>-->
+                <!--Scott Vitale, Founder @ <img src="spigotlabs.png" class="image-no-border" /><br/>-->
+            <!--</p>-->
+        </section>
+
+        <section>
+            <h2>Little Snakes?</h2>
+
             <p>
-                Scott Vitale, Founder @ <img src="spigotlabs.png" class="image-no-border" /><br/>
-                @svvitale <i class="fa fa-twitter"></i> <i class="fa fa-github"></i> <i class="fa fa-facebook"></i> <i class="fa fa-linkedin"></i>
+                <em>"If I have seen further it is by standing on the shoulders of Giants. - Isaac Newton"</em>
+            </p>
+
+            <p class="fragment">
+                3rd party libraries are used in almost every project.<br><br>
+                Managing these dependencies has a long and varied history.
             </p>
         </section>
 
         <section>
-            <h2>APIs: Legos for Developers</h2>
+            <h2>Sometimes it feels like this...</h2>
+            <img src="snakeball.jpg" style="width: 700px;">
+        </section>
+
+        <section>
+            <h2>A Brief History of the World</h2>
             <ul>
-                <li>Authentication</li>
-                <li>Social network engagement</li>
-                <li>Push notifications</li>
-                <li>Analytics</li>
-                <li>...pretty much everything</li>
+                <li class="fragment">Distutils (2000, Python 1.6 / 2.0)</li>
+                <li class="fragment">PyPI (2003, Python 2.3)</li>
+                <li class="fragment">Setuptools / easy_install (2004)</li>
+                <li class="fragment">Virtualenv (2007, Python 2.5)</li>
+                <li class="fragment">Pip (2008, Python 2.6/3.0)</li>
+                <li class="fragment">Virtualenvwrapper (2010)</li>
+                <li class="fragment">Pew (2013)</li>
+                <li class="fragment">Wheels (2013)</li>
             </ul>
         </section>
 
         <section>
-            <h2>No Pain, No Gain</h2>
-            <p style="text-align: left;">Relying on an external API means suffering when that API experiences...</p>
+            <h2>So what?</h2>
+            <img src="so.gif">
+        </section>
+
+        <section>
+            <h2>Pipenv pulls all of this together</h2>
             <ul>
-                <li>Outages</li>
-                <li>Slow response times</li>
-                <li>Maintenance windows</li>
-                <li>DDoS and other attacks</li>
+                <li>Virtualenv management</li>
+                <li>Dependency installation</li>
+                <li>Canonical notation</li>
+                <li>Reasonable upgrade process</li>
             </ul>
         </section>
 
         <section>
-            <h2>Imagine a world where</h2>
-            <div class="highlight-blue">
-                You run a cutting edge pet shop called
-                <div>
-                    <img src="dog.gif" class="dog"><br/>
-                    <span style="font-weight: bolder; color: cadetblue; vertical-align: top;">
-                        Kick Ass Pets
-                    </span>
-                </div>
-            </div>
-            <div class="fragment current-visible">
-                You've built a sweet Django app that interfaces with the
-                <span style="font-weight: bolder; text-decoration: underline">TurtleAPI</span>, a
-                service that provides interesting facts on all varieties of shelled reptiles.
-            </div>
-            <div class="fragment">
-                TurtleAPI lives up to its name. API calls can take <u>seconds</u> to execute.
-            </div>
-        </section>
-
-        <section>
-            <h2>Like any good manager, we need to delegate</h2>
-            <img src="manager.gif">
-        </section>
-
-        <section>
-            <h2>Goals</h2>
+            <h2>Why should I use it?</h2>
             <ul>
-                <li>Fast page loads to the user</li>
-                <li>Slow operations moved to background task</li>
-                <li>Notification / Push when complete</li>
+                <li>Reproducible builds</li>
+                <li>Simplifies sharing projects with other developers</li>
+                <li>Conflicting version mitigation</li>
             </ul>
         </section>
 
         <section>
-            <h2>Enter Celery</h2>
+            <h2>Basic usage</h2>
+            <p>&lt;Do live coding, pray it works&gt;</p>
             <ul>
-                <li>Asynchronous Task Queue</li>
-                <li>Uses a broker for message passing (RabbitMQ, Redis)</li>
-                <li>Delegates tasks to one or more worker processes</li>
+                <li><code>pipenv install</code></li>
+                <li><code>pipenv run</code></li>
             </ul>
         </section>
 
         <section>
-            <section>
-                <h2>Synchronous API Call</h2>
-                <div class="mermaid">
-                    sequenceDiagram
-                    User->>+Django: Request page
-                    Django->>+API: API Request
-                    Note over API: 10s elapses
-                    API->>-Django: API Response
-                    Django->>-User: Page loads
-                </div>
-            </section>
+            <h2>Pipfile, Pipfile.lock</h2>
+            <p>Pipfile is for <u>me</u>, Pipfile.lock is for <u>you</u>.</p>
+            <p class="fragment current-visible">
+                Pipfile lists just the packages and versions you asked pipenv to install directly (the canonical dependencies).
+            </p>
+            <p class="fragment">
+                Pipfile.lock lists the packages that were actually installed (including their dependencies and exact versions).
+            </p>
 
-            <section>
-                <h2>Move API call to Worker</h2>
-                <div class="mermaid">
-                    sequenceDiagram
-                    User->>+Django: Request page
-                    Django->>-User: Page skeleton
-                    Worker->>+API: API Request
-                    Note over API: 10s elapses
-                    API->>-Worker: API Response
-                </div>
-            </section>
-
-            <section>
-                <h2>Add Celery as Queue</h2>
-                <div class="mermaid">
-                    sequenceDiagram
-                    User->>+Django: Request page
-                    Django-->>Celery: Work item
-                    Django->>-User: Page skeleton
-                    Celery-->>+Worker: Work item
-                    Worker->>+API: API Request
-                    Note over API: 10s elapses
-                    API->>-Worker: API Response
-                    Worker->>-Celery: Work result
-                </div>
-            </section>
-
-            <section>
-                <h2>Retrieve Results</h2>
-                <div class="mermaid">
-                    sequenceDiagram
-                    User->>+Django: Request page
-                    Django-->>Celery: Work item
-                    Django->>-User: Page skeleton
-                    Celery-->>+Worker: Work item
-                    Worker->>+API: API Request
-                    Note over API: 10s elapses
-                    API->>-Worker: API Response
-                    Worker->>-Celery: Work result
-                    User->>+Django: Is it done?
-                    Django->>+Celery: Is it done?
-                    Celery->>-Django: Work result
-                    Django->>-User: Work result
-                </div>
-            </section>
         </section>
 
         <section>
-            <h2>Celery Implementation</h2>
+            <h2>Migrating from requirements.txt</h2>
+            <img src="magic.gif">
+        </section>
+
+        <section>
+            <h2>Undoing things</h2>
             <ul>
-                <li>Install Broker (not shown)</li>
-                <li>Install/Configure Celery</li>
-                <li>Define TurtleAPI call as a task</li>
-                <li>Add URL & JS poller to query task status</li>
-                <li>Start Celery worker</li>
+                <li>Remove individual packages: <br><code>pipenv uninstall</code></li>
+                <li>Remove virtualenv: <br><code>pipenv --rm</code></li>
             </ul>
-        </section>
-
-        <section>
-            <h2>Install/Configure Celery</h2>
-            <section>
-                <pre><code data-trim data-noescape>
-pip install celery
-                </code></pre>
-            </section>
-            <section>
-                <pre>app / settings.py<code data-trim data-noescape>
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672'
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-                </code></pre>
-            </section>
-
-            <section>
-                <pre>app / celery.py<code data-trim data-noescape>
-from __future__ import absolute_import, unicode_literals
-import os
-from celery import Celery
-
-# set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
-
-from django.conf import settings
-
-celery_app = Celery('kickasspets')
-
-# Using a string here means the worker don't have to serialize the
-# configuration object to child processes.
-celery_app.config_from_object('django.conf:settings')
-
-# Load task modules from all registered Django app configs.
-celery_app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-                </code></pre>
-            </section>
-            <section>
-                <pre>app / __init__.py<code data-trim data-noescape>
-from __future__ import absolute_import, unicode_literals
-
-# This will make sure the app is always imported when
-# Django starts so that shared_task will use this app.
-from .celery import celery_app
-
-__all__ = ['celery_app']
-                </code></pre>
-            </section>
-        </section>
-
-        <section>
-            <h2>Define TurtleAPI call as a task</h2>
-            <section>
-                Before:
-                <pre>app / views.py<code data-trim data-noescape>
-import requests
-
-def get_turtle_descriptions():
-    # Get turtle descriptions from the API, deserialize, and return as
-    # python list
-    api_response = requests.get(
-        'http://localhost:8001/turtle-api/descriptions')
-    return api_response.json()['turtles']
-
-class TurtleView(View):
-    def get(self, request):
-        descriptions = get_turtle_descriptions()
-
-        return render(request, 'turtles.html', {
-            'page': 'turtles',
-            'descriptions': descriptions
-        })
-                </code></pre>
-            </section>
-            <section>
-                After (task definition):
-                <pre>app / tasks.py<code data-trim data-noescape>
-from __future__ import absolute_import
-from celery import shared_task
-import requests
-
-@shared_task
-def get_turtle_descriptions():
-    # Get turtle descriptions from the API, deserialize, and return as
-    # python list
-    api_response = requests.get(
-        'http://localhost:8001/turtle-api/descriptions')
-    return api_response.json()['turtles']
-                </code></pre>
-            </section>
-            <section>
-                After (view):
-                <pre>app / views.py<code data-trim data-noescape>
-from __future__ import absolute_import
-from . import tasks
-
-class TurtleView(View):
-    def get(self, request):
-        task = tasks.get_turtle_descriptions.delay()
-
-        return render(request, 'turtles.html', {
-            'page': 'turtles',
-            'task_id': task.id
-        })
-                </code></pre>
-            </section>
-        </section>
-        <section>
-            <h2>Add status endpoint</h2>
-            <section>
-                Add URL to urlpatterns (/status/&lt;task_id&gt;)
-                <pre>app / urls.py<code data-trim data-noescape>
-url(r'^status/(?P&lt;task_id&gt;>[a-f\d\-]+)', StatusView.as_view())
-                </code></pre>
-            </section>
-            <section>
-                <pre>app / views.py<code data-trim data-noescape>
-from __future__ import absolute_import
-from celery.result import AsyncResult
-
-class StatusView(View):
-    def get(self, request, task_id):
-
-        # Get task by ID and its status
-        task_result = AsyncResult(task_id)
-        task_is_complete = task_result.ready()
-
-        if task_is_complete:
-            # Retrieve response data
-            data = task_result.get()
-        else:
-            data = None
-
-        return JsonResponse({
-            'complete': task_is_complete,
-            'data': data
-        })
-                </code></pre>
-            </section>
-        </section>
-
-        <section>
-            <h2>Add Javascript poller</h2>
-            <pre><code data-trim>
-    <script src="/static/js/jquery-3.1.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-          var pollTimer = setInterval(function(){
-            $.ajax({
-              url: "http://localhost:8001/status/{{ task_id }}",
-              dataType: "json"
-            }).done(function(response) {
-              if (response.complete) {
-                // Got it!
-
-                // Cancel the polling loop
-                clearInterval(pollTimer);
-
-                // Fill in our turtle descriptions
-                $.each(response.data, function(turtleIdx, turtleDesc) {
-                  $('.turtle-detail').eq(turtleIdx).html(turtleDesc);
-                })
-              }
-            });
-          }, 500);
-        });
-    </script>
-            </code></pre>
-
-        </section>
-
-        <section>
-            <h2>Start Celery worker</h2>
-            <pre><code data-trim data-noescape>
-                celery -A app worker -l info
-            </code></pre>
-        </section>
-
-        <section>
-            <h3>Bask in your improved user experience</h3>
-            <img class="image-no-border" src="lucille.gif" style="width: 450px !important; height: 369px !important;">
         </section>
 
         <section>
             <h2>Thank You</h2>
             <div>
-                https://ants.vitale.io (presentation)
-                https://github.com/svvitale/kick-ass-pets (demo)
-            </div>
-            <div class="space-before">
-                @svvitale <i class="fa fa-twitter"></i> <i class="fa fa-github"></i> <i class="fa fa-facebook"></i> <i class="fa fa-linkedin"></i>
+                http://pipenv.vitale.io (presentation)
+                http://pipenv.readthedocs.io/en/latest/ (Pipenv Docs)
             </div>
         </section>
+
     </div>
 
 </div>
@@ -480,6 +273,16 @@ class StatusView(View):
         ]
     });
 
+</script>
+
+<script type="text/javascript">
+  var header = $('#header').html();
+  if ( window.location.search.match( /print-pdf/gi ) ) {
+    $('.slides > section').prepend(header);
+  }
+  else {
+    $('.slides').prepend(header);
+  }
 </script>
 
 </body>
