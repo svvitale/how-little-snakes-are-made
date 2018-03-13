@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Ants on a Log</title>
+
+    <meta name="author" content="Scott Vitale">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bower_components/mermaid/dist/mermaid.dark.css">
+    <script src="bower_components/mermaid/dist/mermaid.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var config = {
+                startOnLoad: true,
+                sequence: {
+//                diagramMarginX: 50,
+//                diagramMarginY: 10,
+//                boxTextMargin: 5,
+//                noteMargin: 10,
+//                messageMargin: 35,
+                    mirrorActors: true
+                }
+            };
+            mermaid.initialize(config);
+        });
+    </script>
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style>
+        .messageText {
+            fill: lightgrey;
+            stroke: none;
+            font-size: 0.8em;
+        }
+
+        .image-no-border {
+            border: 0 !important;
+            background: rgba(0, 0, 0, 0) !important;
+            height: 150px !important;
+            vertical-align: middle !important;
+            box-shadow: none !important;
+        }
+
+        .dog {
+            width: 200px;
+            border-radius: 200px;
+            border-color: cadetblue !important;
+            margin-bottom: 0 !important;
+        }
+
+        .space-before {
+            margin-top: 20px !important;
+        }
+
+        .reveal pre code {
+            max-height: 600px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h1>Ants on a Log</h1>
+            <h3>Using Celery to Efficiently Process External API Calls in Django</h3>
+            <img src="celery.png" class="image-no-border">
+            <p>
+                Scott Vitale, Founder @ <img src="spigotlabs.png" class="image-no-border" /><br/>
+                @svvitale <i class="fa fa-twitter"></i> <i class="fa fa-github"></i> <i class="fa fa-facebook"></i> <i class="fa fa-linkedin"></i>
+            </p>
+        </section>
+
+        <section>
+            <h2>APIs: Legos for Developers</h2>
+            <ul>
+                <li>Authentication</li>
+                <li>Social network engagement</li>
+                <li>Push notifications</li>
+                <li>Analytics</li>
+                <li>...pretty much everything</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>No Pain, No Gain</h2>
+            <p style="text-align: left;">Relying on an external API means suffering when that API experiences...</p>
+            <ul>
+                <li>Outages</li>
+                <li>Slow response times</li>
+                <li>Maintenance windows</li>
+                <li>DDoS and other attacks</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Imagine a world where</h2>
+            <div class="highlight-blue">
+                You run a cutting edge pet shop called
+                <div>
+                    <img src="dog.gif" class="dog"><br/>
+                    <span style="font-weight: bolder; color: cadetblue; vertical-align: top;">
+                        Kick Ass Pets
+                    </span>
+                </div>
+            </div>
+            <div class="fragment current-visible">
+                You've built a sweet Django app that interfaces with the
+                <span style="font-weight: bolder; text-decoration: underline">TurtleAPI</span>, a
+                service that provides interesting facts on all varieties of shelled reptiles.
+            </div>
+            <div class="fragment">
+                TurtleAPI lives up to its name. API calls can take <u>seconds</u> to execute.
+            </div>
+        </section>
+
+        <section>
+            <h2>Like any good manager, we need to delegate</h2>
+            <img src="manager.gif">
+        </section>
+
+        <section>
+            <h2>Goals</h2>
+            <ul>
+                <li>Fast page loads to the user</li>
+                <li>Slow operations moved to background task</li>
+                <li>Notification / Push when complete</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Enter Celery</h2>
+            <ul>
+                <li>Asynchronous Task Queue</li>
+                <li>Uses a broker for message passing (RabbitMQ, Redis)</li>
+                <li>Delegates tasks to one or more worker processes</li>
+            </ul>
+        </section>
+
+        <section>
+            <section>
+                <h2>Synchronous API Call</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                    User->>+Django: Request page
+                    Django->>+API: API Request
+                    Note over API: 10s elapses
+                    API->>-Django: API Response
+                    Django->>-User: Page loads
+                </div>
+            </section>
+
+            <section>
+                <h2>Move API call to Worker</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                    User->>+Django: Request page
+                    Django->>-User: Page skeleton
+                    Worker->>+API: API Request
+                    Note over API: 10s elapses
+                    API->>-Worker: API Response
+                </div>
+            </section>
+
+            <section>
+                <h2>Add Celery as Queue</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                    User->>+Django: Request page
+                    Django-->>Celery: Work item
+                    Django->>-User: Page skeleton
+                    Celery-->>+Worker: Work item
+                    Worker->>+API: API Request
+                    Note over API: 10s elapses
+                    API->>-Worker: API Response
+                    Worker->>-Celery: Work result
+                </div>
+            </section>
+
+            <section>
+                <h2>Retrieve Results</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                    User->>+Django: Request page
+                    Django-->>Celery: Work item
+                    Django->>-User: Page skeleton
+                    Celery-->>+Worker: Work item
+                    Worker->>+API: API Request
+                    Note over API: 10s elapses
+                    API->>-Worker: API Response
+                    Worker->>-Celery: Work result
+                    User->>+Django: Is it done?
+                    Django->>+Celery: Is it done?
+                    Celery->>-Django: Work result
+                    Django->>-User: Work result
+                </div>
+            </section>
+        </section>
+
+        <section>
+            <h2>Celery Implementation</h2>
+            <ul>
+                <li>Install Broker (not shown)</li>
+                <li>Install/Configure Celery</li>
+                <li>Define TurtleAPI call as a task</li>
+                <li>Add URL & JS poller to query task status</li>
+                <li>Start Celery worker</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Install/Configure Celery</h2>
+            <section>
+                <pre><code data-trim data-noescape>
+pip install celery
+                </code></pre>
+            </section>
+            <section>
+                <pre>app / settings.py<code data-trim data-noescape>
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+                </code></pre>
+            </section>
+
+            <section>
+                <pre>app / celery.py<code data-trim data-noescape>
+from __future__ import absolute_import, unicode_literals
+import os
+from celery import Celery
+
+# set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
+
+from django.conf import settings
+
+celery_app = Celery('kickasspets')
+
+# Using a string here means the worker don't have to serialize the
+# configuration object to child processes.
+celery_app.config_from_object('django.conf:settings')
+
+# Load task modules from all registered Django app configs.
+celery_app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+                </code></pre>
+            </section>
+            <section>
+                <pre>app / __init__.py<code data-trim data-noescape>
+from __future__ import absolute_import, unicode_literals
+
+# This will make sure the app is always imported when
+# Django starts so that shared_task will use this app.
+from .celery import celery_app
+
+__all__ = ['celery_app']
+                </code></pre>
+            </section>
+        </section>
+
+        <section>
+            <h2>Define TurtleAPI call as a task</h2>
+            <section>
+                Before:
+                <pre>app / views.py<code data-trim data-noescape>
+import requests
+
+def get_turtle_descriptions():
+    # Get turtle descriptions from the API, deserialize, and return as
+    # python list
+    api_response = requests.get(
+        'http://localhost:8001/turtle-api/descriptions')
+    return api_response.json()['turtles']
+
+class TurtleView(View):
+    def get(self, request):
+        descriptions = get_turtle_descriptions()
+
+        return render(request, 'turtles.html', {
+            'page': 'turtles',
+            'descriptions': descriptions
+        })
+                </code></pre>
+            </section>
+            <section>
+                After (task definition):
+                <pre>app / tasks.py<code data-trim data-noescape>
+from __future__ import absolute_import
+from celery import shared_task
+import requests
+
+@shared_task
+def get_turtle_descriptions():
+    # Get turtle descriptions from the API, deserialize, and return as
+    # python list
+    api_response = requests.get(
+        'http://localhost:8001/turtle-api/descriptions')
+    return api_response.json()['turtles']
+                </code></pre>
+            </section>
+            <section>
+                After (view):
+                <pre>app / views.py<code data-trim data-noescape>
+from __future__ import absolute_import
+from . import tasks
+
+class TurtleView(View):
+    def get(self, request):
+        task = tasks.get_turtle_descriptions.delay()
+
+        return render(request, 'turtles.html', {
+            'page': 'turtles',
+            'task_id': task.id
+        })
+                </code></pre>
+            </section>
+        </section>
+        <section>
+            <h2>Add status endpoint</h2>
+            <section>
+                Add URL to urlpatterns (/status/&lt;task_id&gt;)
+                <pre>app / urls.py<code data-trim data-noescape>
+url(r'^status/(?P&lt;task_id&gt;>[a-f\d\-]+)', StatusView.as_view())
+                </code></pre>
+            </section>
+            <section>
+                <pre>app / views.py<code data-trim data-noescape>
+from __future__ import absolute_import
+from celery.result import AsyncResult
+
+class StatusView(View):
+    def get(self, request, task_id):
+
+        # Get task by ID and its status
+        task_result = AsyncResult(task_id)
+        task_is_complete = task_result.ready()
+
+        if task_is_complete:
+            # Retrieve response data
+            data = task_result.get()
+        else:
+            data = None
+
+        return JsonResponse({
+            'complete': task_is_complete,
+            'data': data
+        })
+                </code></pre>
+            </section>
+        </section>
+
+        <section>
+            <h2>Add Javascript poller</h2>
+            <pre><code data-trim>
+    <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+          var pollTimer = setInterval(function(){
+            $.ajax({
+              url: "http://localhost:8001/status/{{ task_id }}",
+              dataType: "json"
+            }).done(function(response) {
+              if (response.complete) {
+                // Got it!
+
+                // Cancel the polling loop
+                clearInterval(pollTimer);
+
+                // Fill in our turtle descriptions
+                $.each(response.data, function(turtleIdx, turtleDesc) {
+                  $('.turtle-detail').eq(turtleIdx).html(turtleDesc);
+                })
+              }
+            });
+          }, 500);
+        });
+    </script>
+            </code></pre>
+
+        </section>
+
+        <section>
+            <h2>Start Celery worker</h2>
+            <pre><code data-trim data-noescape>
+                celery -A app worker -l info
+            </code></pre>
+        </section>
+
+        <section>
+            <h3>Bask in your improved user experience</h3>
+            <img class="image-no-border" src="lucille.gif" style="width: 450px !important; height: 369px !important;">
+        </section>
+
+        <section>
+            <h2>Thank You</h2>
+            <div>
+                https://ants.vitale.io (presentation)
+                https://github.com/svvitale/kick-ass-pets (demo)
+            </div>
+            <div class="space-before">
+                @svvitale <i class="fa fa-twitter"></i> <i class="fa fa-github"></i> <i class="fa fa-facebook"></i> <i class="fa fa-linkedin"></i>
+            </div>
+        </section>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, condition: function () {
+                return !!document.querySelector('pre code');
+            }, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
